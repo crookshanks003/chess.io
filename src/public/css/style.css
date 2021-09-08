@@ -24,5 +24,9 @@ body {
 
 #brand {
 	font-size: 1.6rem;
-	letter-spacing: 0.03rem;
+	letter-spacing: 0.02rem;
+}
+
+#active-users {
+	cursor: pointer;
 }

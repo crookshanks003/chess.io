@@ -26,8 +26,10 @@ const main = () => {
 		console.log("Client connected");
 
 		socket.on("login", (userName: string) => {
-			activeUsers.push({ userName, userId: socket.id });
-			io.emit("activeUsers", activeUsers);
+			io.to(socket.id).emit("activeUsers", activeUsers);
+			const currentUser = { userName, userId: socket.id }
+			activeUsers.push(currentUser);
+			socket.broadcast.emit("newUser", currentUser)
 		});
 
 		socket.on("move", (move) => {
@@ -45,7 +47,7 @@ const main = () => {
 
 		socket.on("disconnect", () => {
 			activeUsers = activeUsers.filter((user) => user.userId !== socket.id);
-			io.emit("activeUsers", activeUsers);
+			socket.broadcast.emit("logout", socket.id);
 		});
 	});
 
