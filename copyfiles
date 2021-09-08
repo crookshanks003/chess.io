@@ -1,4 +1,3 @@
 #!/bin/bash
 
 cp -R src/public/ src/views dist/
-rm dist/public/*.ts
