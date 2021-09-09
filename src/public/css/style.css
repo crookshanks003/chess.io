@@ -3,23 +3,23 @@ body {
 	margin: 0;
 	padding: 0;
 }
+
 #board {
-    width: 824px;
+    width: 500px;
 	border: none;
-	flex-basis: 70%;
-	display: none;
+	flex-basis: 65%;
 }
 
-#home-page {
+#result{
+	flex-basis: 25%;
+}
+
+#home-page, #board-page, #loader{
 	display: none;
 }
 
 #board .board-b72b1{
 	border:none;
-}
-
-#result{
-	flex-basis: 30%;
 }
 
 #brand {

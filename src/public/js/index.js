@@ -1,15 +1,26 @@
 let client = io.connect();
 let game;
 let board;
+let currentUserName;
+let currentGame = { oponentId: "", color: "" };
 let activeUsers = [];
 
+function setLoading(loading) {
+	if (loading) {
+		$("#loader").show();
+	} else {
+		$("#loader").hide();
+	}
+}
+
 //Game
-function initGame(data) {
+function initGame() {
 	const config = {
 		draggable: true,
 		position: "start",
 		onDrop: handleMoves,
-		orientation: data.color,
+		orientation: currentGame.color,
+		onDragStart
 	};
 	board = new ChessBoard("board", config);
 	game = new Chess();
@@ -20,7 +31,7 @@ function handleMoves(from, to) {
 	if (move === null) {
 		return "snapback";
 	} else {
-		client.emit("move", move);
+		client.emit("move", { move, oponentId: currentGame.oponentId });
 	}
 	if (game.game_over()) {
 		let winner;
@@ -37,12 +48,34 @@ function handleMoves(from, to) {
 	}
 }
 
+function onDragStart() {
+	if(game.game_over() || game.turn() !== currentGame.color[0]){
+		return false;
+	}
+}
+
 client.on("move", (move) => {
 	game.move(move);
 	board.position(game.fen());
 });
 
-client.on("joinGame", (data) => initGame(data));
+client.on("invite", ({ oponentName, oponentId, color }) => {
+	if (window.confirm(`${oponentName} invited you to join a game`)) {
+		currentGame = { oponentId: oponentId, color: color };
+		client.emit("joinGame", oponentId);
+		$("#home-page").hide();
+		$("#board-page").show();
+		initGame();
+	}
+});
+
+client.on("joinGame", (oponentId) => {
+	currentGame = { oponentId, color: "white" };
+	setLoading(false);
+	$("#home-page").hide();
+	$("#board-page").show();
+	initGame();
+});
 
 //UserList
 client.on("activeUsers", (users) => {
@@ -68,7 +101,14 @@ const setActiveUsers = (activeUsers) => {
 			<td>${user.userId}</td>
 			</tr>`;
 		$("#active-users").append(
-			$(html).on("click", () => console.log(user.userId))
+			$(html).on("click", () => {
+				client.emit("invite", {
+					oponentId: user.userId,
+					currentUserName,
+				});
+				$("#home-page").hide();
+				setLoading(true);
+			})
 		);
 	});
 };

@@ -14,7 +14,7 @@ const main = () => {
 	app.set("views", path.join(__dirname, "views"));
 	app.use(express.static(path.join(__dirname, "/public/")));
 
-	app.get("/", (req, res) => {
+	app.get("/", (_, res) => {
 		return res.render("index");
 	});
 
@@ -27,18 +27,27 @@ const main = () => {
 
 		socket.on("login", (userName: string) => {
 			io.to(socket.id).emit("activeUsers", activeUsers);
-			const currentUser = { userName, userId: socket.id }
+			const currentUser = { userName, userId: socket.id };
 			activeUsers.push(currentUser);
-			socket.broadcast.emit("newUser", currentUser)
+			socket.broadcast.emit("newUser", currentUser);
 		});
 
-		socket.on("move", (move) => {
-			socket.to("roomName").emit("move", move);
+		socket.on("move", ({ move, oponentId }) => {
+			socket.to(oponentId).emit("move", move);
 		});
 
-		socket.on("joinGame", () => {
+		socket.on("joinGame", (userId) => {
 			console.log("room joined");
-			socket.join("roomName");
+			io.to(userId).emit("joinGame", socket.id);
+		});
+
+		socket.on("invite", ({ oponentId, currentUserName }) => {
+			io.to(oponentId).emit("invite", {
+				oponentName: currentUserName,
+				oponentId: socket.id,
+				color: "black",
+			});
+			console.log("Invite sent");
 		});
 
 		socket.on("roomEvent", () => {
