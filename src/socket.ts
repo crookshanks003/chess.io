@@ -20,7 +20,6 @@ export default function socket(server: Server) {
 		});
 
 		socket.on("joinGame", ({ userId, userName }) => {
-			console.log("room joined");
 			io.to(userId).emit("joinGame", { oponentId: socket.id, oponentName: userName });
 		});
 
