@@ -35,8 +35,8 @@ export default function socket(server: Server) {
 			io.to(userId).emit("alert", "Invitation Rejected");
 		});
 
-		socket.on("roomEvent", () => {
-			io.to("roomName").emit("roomEvent", "Hello There");
+		socket.on("resign", (oponentId:string) => {
+			io.to(oponentId).emit("resign");
 		});
 
 		socket.on("disconnect", () => {

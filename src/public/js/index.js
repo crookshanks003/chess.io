@@ -1,9 +1,9 @@
-let client = io.connect();
-let game;
-let board;
-let currentUserName;
-let currentGame = { oponentId: "", color: "", turn: "w" };
-let activeUsers = [];
+var client = io.connect();
+var game;
+var board;
+var currentUserName;
+var currentGame = { oponentId: "", color: "", turn: "w" };
+var activeUsers = [];
 
 function setLoading(loading) {
 	if (loading) {
@@ -59,8 +59,8 @@ function gameOver(move) {
 	$("#result-details").append(
 		$('<p id="reason" class="m-0 text-secondary">').text(reason)
 	);
-	$("#back").attr("disabled", false)
-	currentGame = { oponentId: "", color: "", turn: "w" }
+	$("#back").attr("disabled", false);
+	currentGame = { oponentId: "", color: "", turn: "w" };
 	return winner;
 }
 
@@ -111,6 +111,18 @@ client.on("joinGame", ({ oponentId, oponentName }) => {
 	$("#user").text(currentUserName);
 	$("#oponent").text(oponentName);
 	initGame();
+});
+
+client.on("resign", () => {
+	$("#result-details").append(
+		$('<p id="reason" class="m-0 text-secondary">').text(
+			`${currentGame.color === "white" ? "black" : "white"} resigned`
+		)
+	);
+	$("#result").text(currentGame.color);
+	$("#resign").attr("disabled", true);
+	$("#back").attr("disabled", false);
+	currentGame = { oponentId: "", color: "", turn: "w" };
 });
 
 //UserList
@@ -166,4 +178,24 @@ $("#login-form").on("submit", (e) => {
 	$("#home-page").show();
 	$("#title-name").text(userName);
 	currentUserName = userName;
+});
+
+$("#resign").on("click", () => {
+	$("#result-details").append(
+		$('<p id="reason" class="m-0 text-secondary">').text(
+			`${currentGame.color} resigned`
+		)
+	);
+	$("#result").text(
+		currentGame.color === "white" ? "Black" : "White" + " won"
+	);
+	client.emit("resign", currentGame.oponentId);
+	$("#back").attr("disabled", false);
+	$("#resign").attr("disabled", true);
+	currentGame = { oponentId: "", color: "", turn: "w" };
+});
+
+$("#back").on("click", () => {
+	$("#board-page").hide();
+	$("#home-page").show();
 });
